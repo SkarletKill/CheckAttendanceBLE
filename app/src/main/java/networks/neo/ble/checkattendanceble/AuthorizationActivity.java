@@ -40,6 +40,8 @@ public class AuthorizationActivity extends AppCompatActivity {
                     // goto teacher page
                 } else if (String.valueOf(login.getText()).equals(SC.LOGIN_STUDENT) && String.valueOf(pass.getText()).equals(SC.EMPTY)) {
                     // goto student page
+                    Intent intent = new Intent(".StudentActivity");
+                    startActivity(intent);
                 } else {
                     Toast.makeText(
                             AuthorizationActivity.this, SC.WRONG_LOGIN_OR_PASS,

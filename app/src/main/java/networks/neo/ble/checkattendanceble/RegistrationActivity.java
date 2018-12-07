@@ -24,7 +24,7 @@ public class RegistrationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
         init();
-        auth();
+        register();
     }
 
     private void init() {
@@ -35,7 +35,7 @@ public class RegistrationActivity extends AppCompatActivity {
         btn_reg = findViewById(R.id.btnRegister);
     }
 
-    public void auth() {
+    public void register() {
         btn_reg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
