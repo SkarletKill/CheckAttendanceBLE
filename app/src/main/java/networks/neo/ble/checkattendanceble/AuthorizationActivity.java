@@ -38,6 +38,8 @@ public class AuthorizationActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (String.valueOf(login.getText()).equals(SC.LOGIN_TEACHER) && String.valueOf(pass.getText()).equals(SC.EMPTY)) {
                     // goto teacher page
+                    Intent intent = new Intent(".TeacherActivity");
+                    startActivity(intent);
                 } else if (String.valueOf(login.getText()).equals(SC.LOGIN_STUDENT) && String.valueOf(pass.getText()).equals(SC.EMPTY)) {
                     // goto student page
                     Intent intent = new Intent(".StudentActivity");
