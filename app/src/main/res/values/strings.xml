@@ -1,7 +1,13 @@
 <resources>
     <string name="app_name">CheckAttendanceBLE</string>
-    <string name="auth">Авторизация</string>
-    <string name="log_in">Войти</string>
-    <string name="password">Password</string>
+    <string name="auth">Авторизація</string>
+    <string name="register">Реєстрація</string>
+    <string name="log_in">Увійти</string>
+    <string name="sign_in">Зареєструватися</string>
     <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="password_repeat">Repeat password</string>
+    <string name="username">ПІП</string>
+    <string name="student">Студент</string>
+    <string name="teacher">Викладач</string>
 </resources>

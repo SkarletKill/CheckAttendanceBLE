@@ -5,36 +5,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
-    tools:context=".AuthorizationActivity">
+    tools:context=".RegistrationActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="65dp">
+        tools:layout_editor_absoluteY="0dp">
 
         <ImageView
             android:id="@+id/logo"
             android:layout_width="match_parent"
             android:layout_height="144dp"
-            android:layout_marginTop="20sp"
+            android:layout_marginTop="00sp"
             android:contentDescription="TODO"
             app:srcCompat="@drawable/logo" />
 
         <TextView
-            android:id="@+id/textLogin"
+            android:id="@+id/textRegister"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="monospace"
-            android:text="@string/auth"
+            android:text="@string/register"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="24sp"
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/authlogin"
+            android:id="@+id/regLogin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="40sp"
@@ -48,10 +48,9 @@
             android:textColor="@color/colorAccent" />
 
         <EditText
-            android:id="@+id/password"
+            android:id="@+id/password1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20sp"
             android:layout_marginLeft="40sp"
             android:layout_marginRight="40sp"
             android:layout_marginTop="20sp"
@@ -62,26 +61,56 @@
             android:padding="10sp"
             android:textColor="@color/colorAccent" />
 
-        <Button
-            android:id="@+id/btnLogin"
+        <EditText
+            android:id="@+id/username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="120sp"
-            android:layout_marginRight="120sp"
-            android:background="@drawable/buttons"
-            android:fontFamily="monospace"
-            android:text="@string/log_in"
-            android:textColor="@android:color/white"
-            android:textSize="18sp" />
+            android:layout_marginLeft="40sp"
+            android:layout_marginRight="40sp"
+            android:layout_marginTop="20sp"
+            android:background="@drawable/fields"
+            android:ems="10"
+            android:hint="@string/username"
+            android:inputType="textEmailAddress"
+            android:padding="10sp"
+            android:textColor="@color/colorAccent" />
+
+        <RadioGroup
+            android:id="@+id/radioGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="40sp"
+            android:layout_marginRight="40sp"
+            android:layout_marginTop="20sp"
+            android:checkedButton="@+id/rb_student"
+            android:orientation="horizontal"
+            android:visibility="visible">
+
+            <RadioButton
+                android:id="@+id/rb_student"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:checked="false"
+                android:text="@string/student" />
+
+            <RadioButton
+                android:id="@+id/rb_teacher"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/teacher" />
+
+        </RadioGroup>
 
         <Button
-            android:id="@+id/btnGotoRegister"
+            android:id="@+id/btnRegister"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="90sp"
             android:layout_marginRight="90sp"
-            android:layout_marginTop="40sp"
-            android:background="@drawable/buttons2"
+            android:layout_marginTop="20sp"
+            android:background="@drawable/buttons"
             android:fontFamily="monospace"
             android:text="@string/sign_in"
             android:textColor="@android:color/white"

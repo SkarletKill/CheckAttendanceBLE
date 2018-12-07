@@ -1,5 +1,6 @@
 package networks.neo.ble.checkattendanceble;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -10,7 +11,7 @@ import android.widget.Toast;
 import constants.StringConstants;
 
 public class AuthorizationActivity extends AppCompatActivity {
-    Button btn_log;
+    Button btn_log, btn_reg;
     EditText login, pass;
 
     StringConstants SC;
@@ -21,12 +22,14 @@ public class AuthorizationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_authorization);
         init();
         login();
+        register();
     }
 
     private void init() {
-        login = findViewById(R.id.login);
+        login = findViewById(R.id.authlogin);
         pass = findViewById(R.id.password);
         btn_log = findViewById(R.id.btnLogin);
+        btn_reg = findViewById(R.id.btnGotoRegister);
     }
 
     public void login() {
@@ -35,7 +38,7 @@ public class AuthorizationActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (String.valueOf(login.getText()).equals(SC.LOGIN_TEACHER) && String.valueOf(pass.getText()).equals(SC.EMPTY)) {
                     // goto teacher page
-                } else if(String.valueOf(login.getText()).equals(SC.LOGIN_STUDENT) && String.valueOf(pass.getText()).equals(SC.EMPTY)) {
+                } else if (String.valueOf(login.getText()).equals(SC.LOGIN_STUDENT) && String.valueOf(pass.getText()).equals(SC.EMPTY)) {
                     // goto student page
                 } else {
                     Toast.makeText(
@@ -43,6 +46,16 @@ public class AuthorizationActivity extends AppCompatActivity {
                             Toast.LENGTH_LONG
                     ).show();
                 }
+            }
+        });
+    }
+
+    public void register() {
+        btn_reg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(".RegistrationActivity");
+                startActivity(intent);
             }
         });
     }
