@@ -34,7 +34,7 @@
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/email"
+            android:id="@+id/login"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="40sp"
@@ -42,7 +42,7 @@
             android:layout_marginTop="20sp"
             android:background="@drawable/fields"
             android:ems="10"
-            android:hint="@string/email"
+            android:hint="@string/login"
             android:inputType="textEmailAddress"
             android:padding="10sp"
             android:textColor="@color/colorAccent" />
