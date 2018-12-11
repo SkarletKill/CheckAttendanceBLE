@@ -58,7 +58,11 @@ public class AuthorizationActivity extends AppCompatActivity {
         btn_reg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(".RegistrationActivity");
+//                Intent intent = new Intent(".RegistrationActivity");
+//                startActivity(intent);
+
+//                Intent intent = new Intent(".BeaconExample");
+                Intent intent = new Intent(".BeaconExapmle");
                 startActivity(intent);
             }
         });

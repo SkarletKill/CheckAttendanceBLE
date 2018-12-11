@@ -12,4 +12,5 @@
     <string name="teacher">Викладач</string>
     <string name="power_on">Start</string>
     <string name="power_off">Stop</string>
+    <string name="title_activity_beacon">BeaconActivity</string>
 </resources>
