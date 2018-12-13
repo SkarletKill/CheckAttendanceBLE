@@ -15,8 +15,14 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import constants.StringConstants;
+import constants.UserType;
 
 public class AuthorizationActivity extends AppCompatActivity {
     private final String TAG = "AuthorisationFirebase";
@@ -61,6 +67,33 @@ public class AuthorizationActivity extends AppCompatActivity {
                     Toast.LENGTH_LONG);
         } else {
             // goto user's page
+            final UserType[] userPos = new UserType[1];
+            DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
+            dbRef.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    Long position = (Long) dataSnapshot.child("position").getValue();
+                    Log.d(TAG, "Authorization user position is: " + position);
+                    userPos[0] = UserType.getType(position);
+
+                    if (userPos[0] == null) {
+                        Log.d(TAG, "user pos == null");
+                    } else if (userPos[0].equals(UserType.TEACHER)) {
+                        Intent intent = new Intent(AuthorizationActivity.this, TeacherActivity.class);
+                        startActivity(intent);
+                    } else if (userPos[0].equals(UserType.STUDENT)) {
+                        Intent intent = new Intent(AuthorizationActivity.this, UserActivity.class);
+                        startActivity(intent);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+
         }
     }
 
@@ -68,26 +101,27 @@ public class AuthorizationActivity extends AppCompatActivity {
         btn_log.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mAuth.signInWithEmailAndPassword(String.valueOf(email.getText()), String.valueOf(pass.getText()))
-                        .addOnCompleteListener(AuthorizationActivity.this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
-                                    // Sign in success, update UI with the signed-in user's information
-                                    Log.d(TAG, "signInWithEmail:success");
-                                    FirebaseUser user = mAuth.getCurrentUser();
-                                    updateUI(user);
-                                } else {
-                                    // If sign in fails, display a message to the user.
-                                    Log.w(TAG, "signInWithEmail:failure", task.getException());
-                                    Toast.makeText(AuthorizationActivity.this, "Authentication failed.",
-                                            Toast.LENGTH_SHORT).show();
-                                    updateUI(null);
-                                }
+                if (checkAuth())
+                    mAuth.signInWithEmailAndPassword(String.valueOf(email.getText()), String.valueOf(pass.getText()))
+                            .addOnCompleteListener(AuthorizationActivity.this, new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if (task.isSuccessful()) {
+                                        // Sign in success, update UI with the signed-in user's information
+                                        Log.d(TAG, "signInWithEmail:success");
+                                        FirebaseUser user = mAuth.getCurrentUser();
+                                        updateUI(user);
+                                    } else {
+                                        // If sign in fails, display a message to the user.
+                                        Log.w(TAG, "signInWithEmail:failure", task.getException());
+                                        Toast.makeText(AuthorizationActivity.this, "Authentication failed.",
+                                                Toast.LENGTH_SHORT).show();
+                                        updateUI(null);
+                                    }
 
-                                // ...
-                            }
-                        });
+                                    // ...
+                                }
+                            });
 
 
 //                if (String.valueOf(email.getText()).equals(SC.LOGIN_TEACHER) && String.valueOf(pass.getText()).equals(SC.EMPTY)) {
@@ -106,6 +140,24 @@ public class AuthorizationActivity extends AppCompatActivity {
 //                }
             }
         });
+    }
+
+    private boolean checkAuth() {
+        String email = String.valueOf(this.email.getText());
+        String pass = String.valueOf(this.pass.getText());
+        String msg;
+        if (email == null || email.isEmpty()) {
+            msg = SC.LOGIN_IS_EMPTY;
+        } else if (pass == null || pass.isEmpty()) {
+            msg = SC.PASSWORD_IS_EMPTY;
+        } else {
+            return true;
+        }
+        Toast.makeText(
+                AuthorizationActivity.this, msg,
+                Toast.LENGTH_LONG
+        ).show();
+        return false;
     }
 
     public void register() {
