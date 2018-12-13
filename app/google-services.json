@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "227595757939",
+    "firebase_url": "https://bleattendance.firebaseio.com",
+    "project_id": "bleattendance",
+    "storage_bucket": "bleattendance.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:227595757939:android:70795ab2eea7aaeb",
+        "android_client_info": {
+          "package_name": "networks.neo.ble.checkattendanceble"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "227595757939-nu4il859fn1e50vol6lv7pnlmqseu4aj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "networks.neo.ble.checkattendanceble",
+            "certificate_hash": "978ed65091acb4c925042f50fc0ed8a111f723b6"
+          }
+        },
+        {
+          "client_id": "227595757939-ds5qtgpptugs5lve6l7do45rbjpdfnga.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzq7-qrWVGrlbO7pTq2Y6vE794_dStekM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "227595757939-ds5qtgpptugs5lve6l7do45rbjpdfnga.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

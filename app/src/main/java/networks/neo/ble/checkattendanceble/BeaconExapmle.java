@@ -12,6 +12,8 @@ import android.view.MenuItem;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
 import com.google.android.gms.nearby.connection.DiscoveryOptions;
+import com.google.android.gms.nearby.messages.BleSignal;
+import com.google.android.gms.nearby.messages.Distance;
 import com.google.android.gms.nearby.messages.EddystoneUid;
 import com.google.android.gms.nearby.messages.Message;
 import com.google.android.gms.nearby.messages.MessageFilter;
@@ -27,6 +29,7 @@ import org.altbeacon.beacon.MonitorNotifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import static com.google.android.gms.nearby.connection.Strategy.P2P_CLUSTER;
@@ -75,6 +78,43 @@ public class BeaconExapmle extends AppCompatActivity {
                     EddystoneUid eddystoneUid = EddystoneUid.from(message);
                     Log.i(TAG, "Found Eddystone UID: " + eddystoneUid);
                 }
+            }
+
+            /**
+             * Called when the Bluetooth Low Energy (BLE) signal associated with a message changes.
+             *
+             * This is currently only called for BLE beacon messages.
+             *
+             * For example, this is called when we see the first BLE advertisement
+             * frame associated with a message; or when we see subsequent frames with
+             * significantly different received signal strength indicator (RSSI)
+             * readings.
+             *
+             * For more information, see the MessageListener Javadocs.
+             */
+            @Override
+            public void onBleSignalChanged(final Message message, final BleSignal bleSignal) {
+                Log.i(TAG, "Message: " + message + " has new BLE signal information: " + bleSignal);
+            }
+
+            /**
+             * Called when Nearby's estimate of the distance to a message changes.
+             *
+             * This is currently only called for BLE beacon messages.
+             *
+             * For more information, see the MessageListener Javadocs.
+             */
+            @Override
+            public void onDistanceChanged(final Message message, final Distance distance) {
+                Log.i(TAG, "Distance changed, message: " + message + ", new distance: " + distance);
+            }
+
+            /**
+             * Called when a message is no longer detectable nearby.
+             */
+            @Override
+            public void onLost(final Message message) {
+                Log.i(TAG, "Lost message: " + Arrays.toString(message.getContent()));
             }
         };
 
