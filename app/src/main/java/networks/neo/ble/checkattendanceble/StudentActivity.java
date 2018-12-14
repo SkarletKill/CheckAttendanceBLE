@@ -29,7 +29,7 @@ import entity.User;
 
 public class StudentActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    private static final String TAG = "StudentDB";
+    private static final String TAG = "StudentFirebase";
     private DatabaseReference dbRef;
     private FirebaseUser user;
     private String username;

@@ -95,26 +95,6 @@ public class RegistrationActivity extends AppCompatActivity {
                             }
                         });
 
-
-//                String message = "Something wrong!";
-//                if (String.valueOf(email.getText()).isEmpty()) {
-//                    message = SC.LOGIN_IS_EMPTY;
-//                } else if (String.valueOf(pass.getText()).isEmpty()) {
-//                    message = SC.PASSWORD_IS_EMPTY;
-//                } else if (!checkLogin()) {
-//                    message = SC.LOGIN_IS_ALREADY_EXISTS;
-//                } else if (!checkName()) {
-//                    message = SC.SUCH_USER_NOT_FOUND;
-//                } else {
-//                    message = "";   // All right!
-//                }
-//
-//                if (!message.isEmpty()) {
-//                    Toast.makeText(
-//                            RegistrationActivity.this, message,
-//                            Toast.LENGTH_LONG
-//                    ).show();
-//                }
             }
         });
     }
@@ -130,7 +110,7 @@ public class RegistrationActivity extends AppCompatActivity {
             if (UserType.getType(userPosition) == null) {
                 Log.d(TAG, "user pos == null");
             } else if (UserType.getType(userPosition).equals(UserType.TEACHER)) {
-                Intent intent = new Intent(RegistrationActivity.this, TeacherActivity.class);
+                Intent intent = new Intent(RegistrationActivity.this, SenpaiActivity.class);
                 startActivity(intent);
             } else if (UserType.getType(userPosition).equals(UserType.STUDENT)) {
                 Intent intent = new Intent(RegistrationActivity.this, StudentActivity.class);

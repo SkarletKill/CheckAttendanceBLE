@@ -67,6 +67,16 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".SenpaiActivity"
+            android:label="@string/title_activity_senpai"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name=".SenpaiActivity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

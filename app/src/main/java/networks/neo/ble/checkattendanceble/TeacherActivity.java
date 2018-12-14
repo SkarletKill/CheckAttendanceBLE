@@ -42,4 +42,8 @@ public class TeacherActivity extends AppCompatActivity {
         });
 
     }
+
+    private void getGroups() {
+
+    }
 }

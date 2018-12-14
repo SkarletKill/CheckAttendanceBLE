@@ -67,18 +67,19 @@ public class AuthorizationActivity extends AppCompatActivity {
                     Toast.LENGTH_LONG);
         } else {
             // goto user's page
-            DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
-            dbRef.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            DatabaseReference users = FirebaseDatabase.getInstance().getReference().child("users");
+            users.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    Long position = (Long) dataSnapshot.child("users").child(user.getUid()).child("position").getValue();
+//                    Long position = (Long) dataSnapshot.child("users").child(user.getUid()).child("position").getValue();
+                    Long position = (Long) dataSnapshot.child("position").getValue();
                     Log.d(TAG, "Authorization user position is: " + position);
                     UserType userPos = UserType.getType(position);
 
                     if (userPos == null) {
                         Log.d(TAG, "user pos == null");
                     } else if (userPos.equals(UserType.TEACHER)) {
-                        Intent intent = new Intent(AuthorizationActivity.this, TeacherActivity.class);
+                        Intent intent = new Intent(AuthorizationActivity.this, SenpaiActivity.class);
                         startActivity(intent);
                     } else if (userPos.equals(UserType.STUDENT)) {
                         Intent intent = new Intent(AuthorizationActivity.this, StudentActivity.class);
@@ -91,7 +92,6 @@ public class AuthorizationActivity extends AppCompatActivity {
 
                 }
             });
-
 
         }
     }
@@ -113,7 +113,7 @@ public class AuthorizationActivity extends AppCompatActivity {
                                     } else {
                                         // If sign in fails, display a message to the user.
                                         Log.w(TAG, "signInWithEmail:failure", task.getException());
-                                        Toast.makeText(AuthorizationActivity.this, "Authentication failed.",
+                                        Toast.makeText(AuthorizationActivity.this, task.getException().getMessage(),
                                                 Toast.LENGTH_SHORT).show();
                                         updateUI(null);
                                     }
@@ -121,22 +121,6 @@ public class AuthorizationActivity extends AppCompatActivity {
                                     // ...
                                 }
                             });
-
-
-//                if (String.valueOf(email.getText()).equals(SC.LOGIN_TEACHER) && String.valueOf(pass.getText()).equals(SC.EMPTY)) {
-//                    // goto teacher page
-//                    Intent intent = new Intent(".TeacherActivity");
-//                    startActivity(intent);
-//                } else if (String.valueOf(email.getText()).equals(SC.LOGIN_STUDENT) && String.valueOf(pass.getText()).equals(SC.EMPTY)) {
-//                    // goto student page
-//                    Intent intent = new Intent(".StudentActivity");
-//                    startActivity(intent);
-//                } else {
-//                    Toast.makeText(
-//                            AuthorizationActivity.this, SC.WRONG_LOGIN_OR_PASS,
-//                            Toast.LENGTH_LONG
-//                    ).show();
-//                }
             }
         });
     }
