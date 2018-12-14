@@ -32,7 +32,6 @@ public class StudentActivity extends AppCompatActivity
     private static final String TAG = "StudentFirebase";
     private DatabaseReference dbRef;
     private FirebaseUser user;
-    private String username;
 
     private ImageView imgButton;
     private TextView textImgDescibe;
@@ -55,17 +54,16 @@ public class StudentActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         user = FirebaseAuth.getInstance().getCurrentUser();
-        dbRef = FirebaseDatabase.getInstance().getReference();
+        dbRef = FirebaseDatabase.getInstance().getReference().child("users");
         View headView = navigationView.getHeaderView(0);
         final TextView accountUsername = headView.findViewById(R.id.account_username);
 
         dbRef.child(user.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Long position = (Long) dataSnapshot.child("position").getValue();
                 String username = (String) dataSnapshot.child("name").getValue();
                 accountUsername.setText(username);
-                Log.d(TAG, "Username is: " + StudentActivity.this.username);
+                Log.d(TAG, "Username is: " + username);
             }
 
             @Override
@@ -76,7 +74,6 @@ public class StudentActivity extends AppCompatActivity
         });
 
         TextView accountEmail = headView.findViewById(R.id.account_email);
-        System.out.println("\n" + accountEmail.getText() + "\n");
         accountEmail.setText(user.getEmail());
 
         init();
@@ -91,28 +88,6 @@ public class StudentActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.user, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
