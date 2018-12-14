@@ -60,28 +60,27 @@ public class AuthorizationActivity extends AppCompatActivity {
     }
 
     private void updateUI(Object currentUser) {
-        FirebaseUser user = (FirebaseUser) currentUser;
+        final FirebaseUser user = (FirebaseUser) currentUser;
         if (user == null) {
             String message = "Authorization failed!";
             Toast.makeText(AuthorizationActivity.this, message,
                     Toast.LENGTH_LONG);
         } else {
             // goto user's page
-            final UserType[] userPos = new UserType[1];
             DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
             dbRef.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    Long position = (Long) dataSnapshot.child("position").getValue();
+                    Long position = (Long) dataSnapshot.child("users").child(user.getUid()).child("position").getValue();
                     Log.d(TAG, "Authorization user position is: " + position);
-                    userPos[0] = UserType.getType(position);
+                    UserType userPos = UserType.getType(position);
 
-                    if (userPos[0] == null) {
+                    if (userPos == null) {
                         Log.d(TAG, "user pos == null");
-                    } else if (userPos[0].equals(UserType.TEACHER)) {
+                    } else if (userPos.equals(UserType.TEACHER)) {
                         Intent intent = new Intent(AuthorizationActivity.this, TeacherActivity.class);
                         startActivity(intent);
-                    } else if (userPos[0].equals(UserType.STUDENT)) {
+                    } else if (userPos.equals(UserType.STUDENT)) {
                         Intent intent = new Intent(AuthorizationActivity.this, StudentActivity.class);
                         startActivity(intent);
                     }

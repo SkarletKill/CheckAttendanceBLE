@@ -1,5 +1,6 @@
 package networks.neo.ble.checkattendanceble;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,18 +17,26 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 import constants.StringConstants;
+import constants.UserType;
 
 public class RegistrationActivity extends AppCompatActivity {
     private final String TAG = "RegistrationFirebase";
 
     private FirebaseAuth mAuth;
 
-    Button btn_reg;
-    EditText email, pass, username;
+    private Button btn_reg;
+    private EditText email, pass, username;
     //    RadioButton role;
-    RadioGroup roleGroup;
+    private RadioGroup roleGroup;
+    private long userPosition;
 
     StringConstants SC;
 
@@ -61,6 +70,9 @@ public class RegistrationActivity extends AppCompatActivity {
         btn_reg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (roleGroup.getCheckedRadioButtonId() == R.id.rb_student) userPosition = 2;
+                else if (roleGroup.getCheckedRadioButtonId() == R.id.rb_teacher) userPosition = 1;
+
                 mAuth.createUserWithEmailAndPassword(String.valueOf(email.getText()), String.valueOf(pass.getText()))
                         .addOnCompleteListener(RegistrationActivity.this, new OnCompleteListener<AuthResult>() {
                             @Override
@@ -69,12 +81,13 @@ public class RegistrationActivity extends AppCompatActivity {
                                     // Sign up success, update UI with the signed-up user's information
                                     Log.d(TAG, "createUserWithEmail:success");
                                     FirebaseUser user = mAuth.getCurrentUser();
+                                    if (user != null) writeToDB(user);
                                     updateUI(user);
                                 } else {
                                     // If sign up fails, display a message to the user.
                                     Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                                    Toast.makeText(RegistrationActivity.this, "Registration failed.",
-                                            Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(RegistrationActivity.this, task.getException().getMessage(),
+                                            Toast.LENGTH_LONG).show();
                                     updateUI(null);
                                 }
 
@@ -107,14 +120,36 @@ public class RegistrationActivity extends AppCompatActivity {
     }
 
     private void updateUI(Object currentUser) {
-        FirebaseUser user = (FirebaseUser) currentUser;
+        final FirebaseUser user = (FirebaseUser) currentUser;
         if (user == null) {
             String message = "Registration failed!";
             Toast.makeText(RegistrationActivity.this, message,
                     Toast.LENGTH_LONG);
         } else {
             // goto user's page
+            if (UserType.getType(userPosition) == null) {
+                Log.d(TAG, "user pos == null");
+            } else if (UserType.getType(userPosition).equals(UserType.TEACHER)) {
+                Intent intent = new Intent(RegistrationActivity.this, TeacherActivity.class);
+                startActivity(intent);
+            } else if (UserType.getType(userPosition).equals(UserType.STUDENT)) {
+                Intent intent = new Intent(RegistrationActivity.this, StudentActivity.class);
+                startActivity(intent);
+            }
         }
+    }
+
+    private void writeToDB(final FirebaseUser user) {
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
+        dbRef.child("users").push().setValue(user.getUid());
+        DatabaseReference childUser = dbRef.child("users").child(user.getUid());
+        childUser.child("SSID").setValue(generateSSID());
+        childUser.child("name").setValue(String.valueOf(username.getText()));
+        childUser.child("position").setValue(userPosition);
+    }
+
+    private long generateSSID() {
+        return new Random().nextInt(1000);
     }
 
     private boolean checkLogin() {

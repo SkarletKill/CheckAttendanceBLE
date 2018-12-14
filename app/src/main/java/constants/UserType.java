@@ -10,8 +10,13 @@ public enum UserType {
         this.position = position;
     }
 
-    public static UserType getType(long pos) {
-        if (pos == 1) return TEACHER;
+    public long value() {
+        return position;
+    }
+
+    public static UserType getType(Long pos) {
+        if (pos == null) return null;
+        else if (pos == 1) return TEACHER;
         else if (pos == 2) return STUDENT;
         else return null;
     }
