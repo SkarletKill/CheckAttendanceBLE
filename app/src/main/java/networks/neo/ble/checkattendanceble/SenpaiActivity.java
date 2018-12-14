@@ -15,9 +15,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.common.collect.Lists;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -25,6 +27,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import adapter.PupilModelAdapter;
+import entity.Pupil;
 
 public class SenpaiActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -60,11 +69,12 @@ public class SenpaiActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         user = FirebaseAuth.getInstance().getCurrentUser();
-        dbRef = FirebaseDatabase.getInstance().getReference().child("users");
+        dbRef = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference users = dbRef.child("users");
         View headView = navigationView.getHeaderView(0);
         final TextView accountUsername = headView.findViewById(R.id.s_username);
 
-        dbRef.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+        users.child(user.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String username = (String) dataSnapshot.child("name").getValue();
@@ -81,6 +91,17 @@ public class SenpaiActivity extends AppCompatActivity
 
         TextView accountEmail = headView.findViewById(R.id.s_email);
         accountEmail.setText(user.getEmail());
+
+        listView = (ListView) findViewById(R.id.listView);
+
+        ArrayList<Pupil> pupils = new ArrayList<>();
+//        pupils.add(new Pupil("qwertyuiop", "someone", "123456"));
+//        ArrayAdapter<Pupil> adapter = new ArrayAdapter<>(this, R.layout.pupils, pupils);
+        PupilModelAdapter adapter = new PupilModelAdapter(this, pupils);
+        listView.setAdapter(adapter);
+
+        getPupils("TV-61", adapter, pupils);
+//        ArrayAdapter<Pupil> adapter = new ArrayAdapter<>(this, R.layout.pupils, pupils);
     }
 
     @Override
@@ -116,5 +137,45 @@ public class SenpaiActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void init() {
+        listView = (ListView) findViewById(R.id.listView);
+    }
+
+    private List<Pupil> getPupils(final String group, final PupilModelAdapter adapter, final List<Pupil> pupils) {
+        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Iterable<DataSnapshot> dataSnapshotIterable = dataSnapshot.child("groups").child(group).getChildren();
+                ArrayList<DataSnapshot> pupilsDS = Lists.newArrayList(dataSnapshotIterable);
+                for (DataSnapshot pupil : pupilsDS) {
+                    String pupilHash = (String) pupil.getValue();
+                    Object users = dataSnapshot.child("users").getValue();
+                    Object users1 = dataSnapshot.child("users").child(pupilHash).getValue();
+                    Object users2 = dataSnapshot.child("users").child(pupilHash).child("name").getValue();
+                    pupils.add(
+                            new Pupil(pupilHash,
+                                    dataSnapshot.child("users").
+                                            child(pupilHash).
+                                            child("name").
+                                            getValue().
+                                            toString(),
+                                    dataSnapshot.child("users").child(pupilHash).child("SSID").getValue().toString())
+                    );
+                }
+
+                adapter.notifyDataSetChanged();
+                Log.d(TAG, "Pupils is: " + pupils);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.");
+            }
+        });
+
+        return pupils;
     }
 }
