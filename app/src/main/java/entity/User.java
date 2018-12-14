@@ -12,6 +12,12 @@ public class User {
         this.name = name;
     }
 
+    public void set(String email, String name, UserType position) {
+        this.position = position;
+        this.email = email;
+        this.name = name;
+    }
+
     public UserType getPosition() {
         return position;
     }

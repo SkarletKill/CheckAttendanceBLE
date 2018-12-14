@@ -36,13 +36,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".StudentActivity">
-            <intent-filter>
-                <action android:name=".StudentActivity" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
         <activity android:name=".TeacherActivity">
             <intent-filter>
                 <action android:name=".TeacherActivity" />
@@ -65,7 +58,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".UserActivity"
+            android:name=".StudentActivity"
             android:label="@string/title_activity_user"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>

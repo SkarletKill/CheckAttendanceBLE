@@ -1,10 +1,18 @@
 package networks.neo.ble.checkattendanceble;
 
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -14,43 +22,50 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.Map;
+import constants.UserType;
+import entity.User;
 
-public class StudentActivity extends AppCompatActivity {
+public class StudentActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "StudentDB";
     private DatabaseReference dbRef;
+    private FirebaseUser user;
+    private String username;
 
     private ImageView imgButton;
     private TextView textImgDescibe;
     private boolean isSwitchOn;
 
-    // - student id
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_student);
-        init();
-        start();
-    }
+        setContentView(R.layout.activity_user);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-    private void init() {
-        imgButton = findViewById(R.id.imgPower);
-        textImgDescibe = findViewById(R.id.textOfButtonS);
-        isSwitchOn = false;
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
         dbRef = FirebaseDatabase.getInstance().getReference();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        View headView = navigationView.getHeaderView(0);
+        final TextView accountUsername = headView.findViewById(R.id.account_username);
 
         dbRef.child(user.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Long position = (Long) dataSnapshot.child("position").getValue();
-                String name = (String) dataSnapshot.child("name").getValue();
-//                String value = dataSnapshot.getValue(String.class);
-                Log.d(TAG, "Student position is: " + position);
+                String username = (String) dataSnapshot.child("name").getValue();
+                accountUsername.setText(username);
+                Log.d(TAG, "Username is: " + StudentActivity.this.username);
             }
 
             @Override
@@ -59,6 +74,68 @@ public class StudentActivity extends AppCompatActivity {
                 Log.w(TAG, "Failed to read value.");
             }
         });
+
+        TextView accountEmail = headView.findViewById(R.id.account_email);
+        System.out.println("\n" + accountEmail.getText() + "\n");
+        accountEmail.setText(user.getEmail());
+
+        init();
+        start();
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.user, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_gallery) {
+            FirebaseAuth.getInstance().signOut();   // End user session
+            startActivity(new Intent(StudentActivity.this, AuthorizationActivity.class));  // Go back to start page
+            finish();
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    private void init() {
+        imgButton = findViewById(R.id.imgPower);
+        textImgDescibe = findViewById(R.id.textOfButtonS);
+        isSwitchOn = false;
     }
 
     private void testFDB() {

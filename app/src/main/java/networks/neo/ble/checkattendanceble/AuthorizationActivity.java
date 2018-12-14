@@ -82,7 +82,7 @@ public class AuthorizationActivity extends AppCompatActivity {
                         Intent intent = new Intent(AuthorizationActivity.this, TeacherActivity.class);
                         startActivity(intent);
                     } else if (userPos[0].equals(UserType.STUDENT)) {
-                        Intent intent = new Intent(AuthorizationActivity.this, UserActivity.class);
+                        Intent intent = new Intent(AuthorizationActivity.this, StudentActivity.class);
                         startActivity(intent);
                     }
                 }
