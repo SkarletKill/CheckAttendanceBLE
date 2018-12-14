@@ -79,6 +79,7 @@ public class AuthorizationActivity extends AppCompatActivity {
                     if (userPos == null) {
                         Log.d(TAG, "user pos == null");
                     } else if (userPos.equals(UserType.TEACHER)) {
+//                        Intent intent = new Intent(AuthorizationActivity.this, SenpaiActivity.class);
                         Intent intent = new Intent(AuthorizationActivity.this, SenpaiActivity.class);
                         startActivity(intent);
                     } else if (userPos.equals(UserType.STUDENT)) {

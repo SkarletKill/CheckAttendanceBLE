@@ -1,9 +1,11 @@
 package networks.neo.ble.checkattendanceble;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -32,6 +34,7 @@ import com.google.firebase.database.ValueEventListener;
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.MonitorNotifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
@@ -40,11 +43,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import adapter.PupilModelAdapter;
 import entity.Pupil;
 import entity.User;
+
+import static constants.BeaconTemplates.IBEACON;
 
 public class SenpaiActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, BeaconConsumer {
@@ -56,6 +62,9 @@ public class SenpaiActivity extends AppCompatActivity
     private BeaconManager beaconManager;
     private List<String> groups;
     private String currentGroup;
+    private List<Pupil> pupils;
+    private List<Pupil> present;
+    private List<Pupil> absent;
 
     private ListView listView;
 
@@ -115,6 +124,7 @@ public class SenpaiActivity extends AppCompatActivity
         listView = (ListView) findViewById(R.id.listView);
 
         final ArrayList<Pupil> pupils = new ArrayList<>();
+        this.pupils = pupils;
 //        pupils.add(new Pupil("qwertyuiop", "someone", "123456"));
 //        ArrayAdapter<Pupil> adapter = new ArrayAdapter<>(this, R.layout.pupils, pupils);
         final PupilModelAdapter adapter = new PupilModelAdapter(this, pupils);
@@ -147,6 +157,16 @@ public class SenpaiActivity extends AppCompatActivity
             }
         });
 
+        beaconManager = BeaconManager.getInstanceForApplication(this);
+        beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(IBEACON));
+        beaconManager.bind(this);
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        beaconManager.unbind(this);
     }
 
     @Override
@@ -159,6 +179,7 @@ public class SenpaiActivity extends AppCompatActivity
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -167,12 +188,22 @@ public class SenpaiActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             setTitle(TITLE + " : Present");
+//            if (present == null)
+                present = pupils.stream().filter(Pupil::isPresent).collect(Collectors.toCollection(ArrayList::new));
+            PupilModelAdapter adapter = new PupilModelAdapter(SenpaiActivity.this, present);
+            listView.setAdapter(adapter);
         } else if (id == R.id.nav_gallery) {
             setTitle(TITLE + " : Absent");
+//            if (absent == null)
+                absent = pupils.stream().filter(p -> !p.isPresent()).collect(Collectors.toCollection(ArrayList::new));
+            PupilModelAdapter adapter = new PupilModelAdapter(SenpaiActivity.this, absent);
+            listView.setAdapter(adapter);
         } else if (id == R.id.nav_slideshow) {
             setTitle(TITLE + " : All");
+            PupilModelAdapter adapter = new PupilModelAdapter(SenpaiActivity.this, pupils);
+            listView.setAdapter(adapter);
         } else if (id == R.id.nav_manage) {
-
+            // scan...?
         } else if (id == R.id.nav_send) {
             FirebaseAuth.getInstance().signOut();   // End user session
             startActivity(new Intent(SenpaiActivity.this, AuthorizationActivity.class));  // Go back to start page
@@ -324,7 +355,7 @@ public class SenpaiActivity extends AppCompatActivity
 
         try {
             beaconManager.startRangingBeaconsInRegion(region);
-            beaconManager.startMonitoringBeaconsInRegion(region);
+//            beaconManager.startMonitoringBeaconsInRegion(region);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
