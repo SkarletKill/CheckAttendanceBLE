@@ -40,9 +40,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import adapter.PupilModelAdapter;
 import entity.Pupil;
+import entity.User;
 
 public class SenpaiActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, BeaconConsumer {
@@ -258,31 +260,64 @@ public class SenpaiActivity extends AppCompatActivity
         beaconManager.addRangeNotifier(new RangeNotifier() {
             @Override
             public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
-                for (Beacon oneBeacon : beacons) {
-                    Log.d(TAG, "distance: " + oneBeacon.getDistance() + " id:" + oneBeacon.getId1() + "/" + oneBeacon.getId2() + "/" + oneBeacon.getId3());
-                    // check in DB
+                if (SenpaiActivity.this.currentGroup != null) {
+                    // take students IDs in one group
+                    final List<String> members = new ArrayList<>();
+                    DatabaseReference currentGroup = dbRef.child("groups").child(SenpaiActivity.this.currentGroup);
+                    currentGroup.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            Iterable<DataSnapshot> memberIDS = dataSnapshot.getChildren();
+                            ArrayList<DataSnapshot> membersDS = Lists.newArrayList(memberIDS);
+                            for (DataSnapshot member : membersDS) {
+                                String memberID = (String) member.getValue();
+                                members.add(memberID);
+                            }
 
-//                    DatabaseReference teachers = dbRef.child("teachers");
-//                    teachers.child(user.getUid()).addValueEventListener(new ValueEventListener() {
-//                        @Override
-//                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                            Iterable<DataSnapshot> groupIDS = dataSnapshot.getChildren();
-//                            ArrayList<DataSnapshot> groupsDS = Lists.newArrayList(groupIDS);
-//                            for (DataSnapshot group : groupsDS) {
-//                                String oneGroup = (String) group.getValue();
-//                                groups.add(oneGroup);
-//                            }
-//
-//
-//                            Log.d(TAG, "Groups is: " + groups);
-//                        }
-//
-//                        @Override
-//                        public void onCancelled(@NonNull DatabaseError databaseError) {
-//                            // Failed to read value
-//                            Log.w(TAG, "Failed to read value.");
-//                        }
-//                    });
+                            Log.d(TAG, "Members is: " + members);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                            // Failed to read value
+                            Log.w(TAG, "Failed to read value.");
+                        }
+                    });
+
+                    // take student's SSIDs in group
+                    final List<Pupil> pupils = new ArrayList<>();
+                    DatabaseReference users = dbRef.child("users");
+                    users.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            pupils.clear();
+                            for (String member : members) {
+                                String ssid = (String) dataSnapshot.child(member).child("SSID").getValue();
+                                String name = (String) dataSnapshot.child(member).child("name").getValue();
+                                Log.d(TAG, "SSID is: " + ssid);
+                                Log.d(TAG, "Name is: " + name);
+                                pupils.add(new Pupil(member, name, ssid));
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                            // Failed to read value
+                            Log.w(TAG, "Failed to read value.");
+                        }
+                    });
+
+                    // search beacons
+                    for (Beacon oneBeacon : beacons) {
+                        Log.d(TAG, "distance: " + oneBeacon.getDistance() + " id:" + oneBeacon.getId1() + "/" + oneBeacon.getId2() + "/" + oneBeacon.getId3());
+
+                        // find them beacons
+                        Pupil found = getPupil(pupils, oneBeacon.getId1().toString());
+                        if (found != null) {
+                            found.setPresent(true);
+                        }
+
+                    }
                 }
             }
         });
@@ -293,5 +328,12 @@ public class SenpaiActivity extends AppCompatActivity
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+    }
+
+    private Pupil getPupil(List<Pupil> pupils, String beaconID) {
+        for (Pupil pupil : pupils) {
+            if (pupil.getSSID().equals(beaconID)) return pupil;
+        }
+        return null;
     }
 }
