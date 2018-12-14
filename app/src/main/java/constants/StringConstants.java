@@ -12,6 +12,7 @@ public interface StringConstants {
     String LOGIN_IS_EMPTY = "Please enter your login";
     String LOGIN_IS_ALREADY_EXISTS = "A user with this login already exists";
     String PASSWORD_IS_EMPTY = "Please enter your password";
+    String NAME_IS_EMPTY = "Please enter your password";
     String SUCH_USER_NOT_FOUND = "Name not found in database";
 
 }

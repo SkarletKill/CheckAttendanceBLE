@@ -73,31 +73,33 @@ public class RegistrationActivity extends AppCompatActivity {
                 if (roleGroup.getCheckedRadioButtonId() == R.id.rb_student) userPosition = 2;
                 else if (roleGroup.getCheckedRadioButtonId() == R.id.rb_teacher) userPosition = 1;
 
-                mAuth.createUserWithEmailAndPassword(String.valueOf(email.getText()), String.valueOf(pass.getText()))
-                        .addOnCompleteListener(RegistrationActivity.this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
-                                    // Sign up success, update UI with the signed-up user's information
-                                    Log.d(TAG, "createUserWithEmail:success");
-                                    FirebaseUser user = mAuth.getCurrentUser();
-                                    if (user != null) writeToDB(user);
-                                    updateUI(user);
-                                } else {
-                                    // If sign up fails, display a message to the user.
-                                    Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                                    Toast.makeText(RegistrationActivity.this, task.getException().getMessage(),
-                                            Toast.LENGTH_LONG).show();
-                                    updateUI(null);
-                                }
+                if (checkRegister()) {
+                    mAuth.createUserWithEmailAndPassword(String.valueOf(email.getText()), String.valueOf(pass.getText()))
+                            .addOnCompleteListener(RegistrationActivity.this, new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if (task.isSuccessful()) {
+                                        // Sign up success, update UI with the signed-up user's information
+                                        Log.d(TAG, "createUserWithEmail:success");
+                                        FirebaseUser user = mAuth.getCurrentUser();
+                                        if (user != null) writeToDB(user);
+                                        updateUI(user);
+                                    } else {
+                                        // If sign up fails, display a message to the user.
+                                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                                        Toast.makeText(RegistrationActivity.this, task.getException().getMessage(),
+                                                Toast.LENGTH_LONG).show();
+                                        updateUI(null);
+                                    }
 
-                                // ...
-                            }
-                        });
+                                    // ...
+                                }
+                            });
+                }
 
             }
         });
-    }
+    }   // end register
 
     private void updateUI(Object currentUser) {
         final FirebaseUser user = (FirebaseUser) currentUser;
@@ -121,29 +123,56 @@ public class RegistrationActivity extends AppCompatActivity {
 
     private void writeToDB(final FirebaseUser user) {
         DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
-        dbRef.child("users").push().setValue(user.getUid());
+//        dbRef.child("users").push().setValue(user.getUid());
         DatabaseReference childUser = dbRef.child("users").child(user.getUid());
         childUser.child("SSID").setValue(generateSSID());
         childUser.child("name").setValue(String.valueOf(username.getText()));
         childUser.child("position").setValue(userPosition);
     }
 
-    private long generateSSID() {
-        return new Random().nextInt(1000);
+    private String generateSSID() {
+//        String id_template = "00000000-0000-0000-0000-000000000000";
+        String idNew = new StringBuilder()
+                .append(create4Hex()).append(create4Hex())
+                .append("-").append(create4Hex())
+                .append("-").append(create4Hex())
+                .append("-").append(create4Hex())
+                .append("-").append(create4Hex()).append(create4Hex()).append(create4Hex()).toString();
+
+        return idNew;
     }
 
-    private boolean checkLogin() {
-
-        return false;
-    }
-
-    private boolean checkName() {
-        RadioButton role = findViewById(roleGroup.getCheckedRadioButtonId());
-        if (String.valueOf(role.getText()).equals(SC.TEACHER)) {
-            // find teacher name (username)
-        } else if (String.valueOf(role.getText()).equals(SC.STUDENT)) {
-            // find student name (username)
+    private String create4Hex() {
+        String s4 = "";
+        for (int i = 0; i < 4; i++) {
+            int num = new Random().nextInt(15);
+            String strNum;
+            if (num < 10) strNum = String.valueOf(num);
+            else {
+                strNum = String.valueOf((char) ('a' + (num - 10)));
+            }
+            s4 += strNum;
         }
+        return s4;
+    }
+
+    private boolean checkRegister() {
+        String email = String.valueOf(this.email.getText());
+        String pass = String.valueOf(this.pass.getText());
+        String msg;
+        if (email == null || email.isEmpty()) {
+            msg = SC.LOGIN_IS_EMPTY;
+        } else if (pass == null || pass.isEmpty()) {
+            msg = SC.PASSWORD_IS_EMPTY;
+        } else if (String.valueOf(username.getText()) == null || String.valueOf(username.getText()).isEmpty()) {
+            msg = SC.NAME_IS_EMPTY;
+        } else {
+            return true;
+        }
+        Toast.makeText(
+                RegistrationActivity.this, msg,
+                Toast.LENGTH_LONG
+        ).show();
         return false;
     }
 }

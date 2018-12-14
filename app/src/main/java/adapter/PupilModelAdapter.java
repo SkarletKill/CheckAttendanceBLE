@@ -13,22 +13,22 @@ import entity.Pupil;
 import networks.neo.ble.checkattendanceble.R;
 
 public class PupilModelAdapter extends BaseAdapter {
-    private List<Pupil> pupils;
+    private List<Pupil> allPupils;
     private LayoutInflater inflater;
 
     public PupilModelAdapter(Context context, List<Pupil> pupils) {
-        this.pupils = pupils;
+        this.allPupils = pupils;
         this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
     public int getCount() {
-        return pupils.size();
+        return allPupils.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return pupils.get(i);
+        return allPupils.get(i);
     }
 
     @Override

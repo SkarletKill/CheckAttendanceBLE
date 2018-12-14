@@ -2,6 +2,7 @@ package networks.neo.ble.checkattendanceble;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -28,7 +29,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.altbeacon.beacon.Beacon;
+import org.altbeacon.beacon.BeaconConsumer;
+import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.MonitorNotifier;
+import org.altbeacon.beacon.RangeNotifier;
+import org.altbeacon.beacon.Region;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,16 +45,23 @@ import adapter.PupilModelAdapter;
 import entity.Pupil;
 
 public class SenpaiActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, BeaconConsumer {
     private static final String TAG = "TeacherFirebase";
+    private static final String TITLE = "Teacher's room";
     private DatabaseReference dbRef;
     private FirebaseUser user;
 
-    ListView listView;
+    private BeaconManager beaconManager;
+    private List<String> groups;
+    private String currentGroup;
+
+    private ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitle(TITLE + " : All");
+
         setContentView(R.layout.activity_senpai);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -54,8 +70,10 @@ public class SenpaiActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Scanning...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+
             }
         });
 
@@ -94,14 +112,39 @@ public class SenpaiActivity extends AppCompatActivity
 
         listView = (ListView) findViewById(R.id.listView);
 
-        ArrayList<Pupil> pupils = new ArrayList<>();
+        final ArrayList<Pupil> pupils = new ArrayList<>();
 //        pupils.add(new Pupil("qwertyuiop", "someone", "123456"));
 //        ArrayAdapter<Pupil> adapter = new ArrayAdapter<>(this, R.layout.pupils, pupils);
-        PupilModelAdapter adapter = new PupilModelAdapter(this, pupils);
+        final PupilModelAdapter adapter = new PupilModelAdapter(this, pupils);
         listView.setAdapter(adapter);
 
-        getPupils("TV-61", adapter, pupils);
-//        ArrayAdapter<Pupil> adapter = new ArrayAdapter<>(this, R.layout.pupils, pupils);
+        groups = new ArrayList<>();
+        DatabaseReference teachers = dbRef.child("teachers");
+        teachers.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Iterable<DataSnapshot> groupIDS = dataSnapshot.getChildren();
+                ArrayList<DataSnapshot> groupsDS = Lists.newArrayList(groupIDS);
+                for (DataSnapshot group : groupsDS) {
+                    String oneGroup = (String) group.getValue();
+                    groups.add(oneGroup);
+                }
+
+                if (!groups.isEmpty()) {
+                    currentGroup = groups.get(0);
+                    getPupils(currentGroup, adapter, pupils);
+                }
+
+                Log.d(TAG, "Groups is: " + groups);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.");
+            }
+        });
+
     }
 
     @Override
@@ -121,11 +164,11 @@ public class SenpaiActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
+            setTitle(TITLE + " : Present");
         } else if (id == R.id.nav_gallery) {
-
+            setTitle(TITLE + " : Absent");
         } else if (id == R.id.nav_slideshow) {
-
+            setTitle(TITLE + " : All");
         } else if (id == R.id.nav_manage) {
 
         } else if (id == R.id.nav_send) {
@@ -140,7 +183,7 @@ public class SenpaiActivity extends AppCompatActivity
     }
 
     private void init() {
-        listView = (ListView) findViewById(R.id.listView);
+//        listView = (ListView) findViewById(R.id.listView);
     }
 
     private List<Pupil> getPupils(final String group, final PupilModelAdapter adapter, final List<Pupil> pupils) {
@@ -151,17 +194,16 @@ public class SenpaiActivity extends AppCompatActivity
                 ArrayList<DataSnapshot> pupilsDS = Lists.newArrayList(dataSnapshotIterable);
                 for (DataSnapshot pupil : pupilsDS) {
                     String pupilHash = (String) pupil.getValue();
-                    Object users = dataSnapshot.child("users").getValue();
-                    Object users1 = dataSnapshot.child("users").child(pupilHash).getValue();
-                    Object users2 = dataSnapshot.child("users").child(pupilHash).child("name").getValue();
+//                    Object users = dataSnapshot.child("users").getValue();
+//                    Object users1 = dataSnapshot.child("users").child(pupilHash).getValue();
+//                    Object users2 = dataSnapshot.child("users").child(pupilHash).child("name").getValue();
                     pupils.add(
                             new Pupil(pupilHash,
-                                    dataSnapshot.child("users").
+                                    (String) dataSnapshot.child("users").
                                             child(pupilHash).
                                             child("name").
-                                            getValue().
-                                            toString(),
-                                    dataSnapshot.child("users").child(pupilHash).child("SSID").getValue().toString())
+                                            getValue(),
+                                    (String) dataSnapshot.child("users").child(pupilHash).child("SSID").getValue())
                     );
                 }
 
@@ -177,5 +219,79 @@ public class SenpaiActivity extends AppCompatActivity
         });
 
         return pupils;
+    }
+
+    @Override
+    public void onBeaconServiceConnect() {
+        final Region region = new Region("myBeacons", null, null, null);
+
+        beaconManager.addMonitorNotifier(new MonitorNotifier() {
+            @Override
+            public void didEnterRegion(Region region) {
+                Log.i(TAG, "I just saw an beacon for the first time!");
+                try {
+                    beaconManager.startRangingBeaconsInRegion(region);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void didExitRegion(Region region) {
+                Log.i(TAG, "I no longer see an beacon");
+                try {
+                    beaconManager.stopRangingBeaconsInRegion(region);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void didDetermineStateForRegion(int state, Region region) {
+                if (state == 0) Log.i(TAG, "I have just switched to seeing/not seeing beacons");
+                else if (state == 1)
+                    Log.i(TAG, "I have just switched to NOT seeing beacons");
+//                Log.i(TAG, "I have just switched from seeing/not seeing beacons: " + state);
+            }
+        });
+
+        beaconManager.addRangeNotifier(new RangeNotifier() {
+            @Override
+            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+                for (Beacon oneBeacon : beacons) {
+                    Log.d(TAG, "distance: " + oneBeacon.getDistance() + " id:" + oneBeacon.getId1() + "/" + oneBeacon.getId2() + "/" + oneBeacon.getId3());
+                    // check in DB
+
+//                    DatabaseReference teachers = dbRef.child("teachers");
+//                    teachers.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+//                        @Override
+//                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                            Iterable<DataSnapshot> groupIDS = dataSnapshot.getChildren();
+//                            ArrayList<DataSnapshot> groupsDS = Lists.newArrayList(groupIDS);
+//                            for (DataSnapshot group : groupsDS) {
+//                                String oneGroup = (String) group.getValue();
+//                                groups.add(oneGroup);
+//                            }
+//
+//
+//                            Log.d(TAG, "Groups is: " + groups);
+//                        }
+//
+//                        @Override
+//                        public void onCancelled(@NonNull DatabaseError databaseError) {
+//                            // Failed to read value
+//                            Log.w(TAG, "Failed to read value.");
+//                        }
+//                    });
+                }
+            }
+        });
+
+        try {
+            beaconManager.startRangingBeaconsInRegion(region);
+            beaconManager.startMonitoringBeaconsInRegion(region);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 }
