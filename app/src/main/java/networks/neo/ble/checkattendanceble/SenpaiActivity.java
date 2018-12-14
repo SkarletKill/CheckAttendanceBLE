@@ -83,7 +83,7 @@ public class SenpaiActivity extends AppCompatActivity
             public void onClick(View view) {
                 Snackbar.make(view, "Scanning...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-
+                beaconManager.bind(SenpaiActivity.this);
 
             }
         });
@@ -203,7 +203,8 @@ public class SenpaiActivity extends AppCompatActivity
             PupilModelAdapter adapter = new PupilModelAdapter(SenpaiActivity.this, pupils);
             listView.setAdapter(adapter);
         } else if (id == R.id.nav_manage) {
-            // scan...?
+            // stop scan
+            beaconManager.unbind(this);
         } else if (id == R.id.nav_send) {
             FirebaseAuth.getInstance().signOut();   // End user session
             startActivity(new Intent(SenpaiActivity.this, AuthorizationActivity.class));  // Go back to start page
@@ -325,8 +326,8 @@ public class SenpaiActivity extends AppCompatActivity
                             for (String member : members) {
                                 String ssid = (String) dataSnapshot.child(member).child("SSID").getValue();
                                 String name = (String) dataSnapshot.child(member).child("name").getValue();
-                                Log.d(TAG, "SSID is: " + ssid);
-                                Log.d(TAG, "Name is: " + name);
+//                                Log.d(TAG, "SSID is: " + ssid);
+//                                Log.d(TAG, "Name is: " + name);
                                 pupils.add(new Pupil(member, name, ssid));
                             }
                         }
@@ -343,8 +344,9 @@ public class SenpaiActivity extends AppCompatActivity
                         Log.d(TAG, "distance: " + oneBeacon.getDistance() + " id:" + oneBeacon.getId1() + "/" + oneBeacon.getId2() + "/" + oneBeacon.getId3());
 
                         // find them beacons
-                        Pupil found = getPupil(pupils, oneBeacon.getId1().toString());
+                        Pupil found = getPupil(SenpaiActivity.this.pupils, oneBeacon.getId1().toString());
                         if (found != null) {
+                            Log.d(TAG, "FOUND!!!!!!!!!");
                             found.setPresent(true);
                         }
 

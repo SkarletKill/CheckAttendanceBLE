@@ -163,7 +163,7 @@ public class StudentActivity extends AppCompatActivity
                 if (isSwitchOn) {
                     // stop beacon
                     imgButton.setImageResource(R.drawable.power_button_red_white_inner);
-                    textImgDescibe.setText(R.string.power_on);
+                    textImgDescibe.setText(R.string.power_off);
                     isSwitchOn = false;
 
                     // beacon transmitting
@@ -172,7 +172,7 @@ public class StudentActivity extends AppCompatActivity
                 } else {
                     // start beacon
                     imgButton.setImageResource(R.drawable.power_button_green_white_inner);
-                    textImgDescibe.setText(R.string.power_off);
+                    textImgDescibe.setText(R.string.power_on);
                     isSwitchOn = true;
 
                     beaconTransmitter.startAdvertising(beacon);

@@ -10,8 +10,8 @@
     <string name="username">ПІП</string>
     <string name="student">Студент</string>
     <string name="teacher">Викладач</string>
-    <string name="power_on">Start</string>
-    <string name="power_off">Stop</string>
+    <string name="power_on">I\'m here!</string>
+    <string name="power_off">I\'m leave :)</string>
     <string name="title_activity_beacon">BeaconActivity</string>
     <string name="title_activity_user">UserActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
